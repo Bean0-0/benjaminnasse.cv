@@ -40,6 +40,12 @@ test('metadata, accessibility hooks, and honest project attribution exist', () =
   assert.ok(!html.includes('<script'), 'Site should not require JavaScript');
 });
 
+test('edge transformations cannot inject analytics blocked by CSP', async () => {
+  const headers = await readFile(new URL('public/_headers', root), 'utf8');
+  assert.match(headers, /Cache-Control:.*no-transform/);
+  assert.match(headers, /Content-Security-Policy: default-src 'none'/);
+});
+
 test('deployment serves only public directory without SPA fallback', async () => {
   const config = JSON.parse(await readFile(new URL('wrangler.jsonc', root), 'utf8'));
   assert.equal(config.assets.directory, './public');

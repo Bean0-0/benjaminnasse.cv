@@ -41,6 +41,7 @@ test('PDF, security headers, and missing pages', async ({ request }) => {
   expect(pdf.headers()['content-type']).toContain('application/pdf');
   expect((await pdf.body()).subarray(0, 5).toString()).toBe('%PDF-');
   const home = await request.get('/');
+  expect(home.headers()['cache-control']).toContain('no-transform');
   expect(home.headers()['x-content-type-options']).toBe('nosniff');
   expect(home.headers()['content-security-policy']).toContain("frame-ancestors 'none'");
   const missing = await request.get('/not-a-real-page');

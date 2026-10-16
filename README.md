@@ -47,6 +47,8 @@ Browser tests cover 320/390/768/1440px layouts, navigation, WCAG AA automated ch
 - Upload directory: `public/` only
 - Direct deployment: `npm run deploy` (requires Cloudflare authorization)
 
+`public/_headers` sends a strict Content Security Policy and `Cache-Control: no-transform` to prevent Cloudflare from injecting an analytics beacon. This preserves the no-script/no-tracking design; `no-transform` can also prevent edge compression and image transformations. See [Cloudflare's injection behavior](https://developers.cloudflare.com/web-analytics/get-started/).
+
 ### GitHub automatic deployments — one-time connection
 
 In Cloudflare, open **Workers & Pages → benjaminnasse-cv → Settings → Builds → Connect**. Authorize the Cloudflare GitHub app for **only** `Bean0-0/benjaminnasse.cv` where repository selection is offered.
