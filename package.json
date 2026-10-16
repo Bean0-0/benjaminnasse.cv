@@ -1,0 +1,21 @@
+{
+  "name": "benjaminnasse-cv",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Benjamin Nasse's personal website",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --ip 127.0.0.1 --port 8787",
+    "check": "node --test tests/*.test.js",
+    "test:e2e": "playwright test",
+    "resume:build": "tectonic resume/resume.tex --outdir public",
+    "build": "npm run check",
+    "deploy": "wrangler deploy",
+    "deploy:check": "wrangler deploy --dry-run"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@playwright/test": "^1.64.1",
+    "wrangler": "^4.151.1"
+  }
+}

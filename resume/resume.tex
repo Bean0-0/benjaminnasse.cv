@@ -1,0 +1,193 @@
+%-------------------------
+% Resume in Latex
+% Author : Benjamin Nasse
+% Based off of: https://github.com/sb2nov/resume
+% License : MIT
+%------------------------
+
+\documentclass[letterpaper,11pt]{article}
+
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+\ifdefined\pdfgentounicode
+  \input{glyphtounicode}
+\fi
+
+\pagestyle{fancy}
+\fancyhf{} % clear all header and footer fields
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Adjust margins
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1in}
+\addtolength{\topmargin}{-.5in}
+\addtolength{\textheight}{1.0in}
+
+\urlstyle{same}
+
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% Sections formatting
+\titleformat{\section}{
+  \vspace{-4pt}\scshape\raggedright\large
+}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+
+% Ensure that generate pdf is machine readable/ATS parsable (pdfTeX; XeTeX does this automatically)
+\ifdefined\pdfgentounicode
+  \pdfgentounicode=1
+\fi
+
+%-------------------------
+% Custom commands
+\newcommand{\resumeItem}[1]{
+  \item\small{
+    {#1 \vspace{-2pt}}
+  }
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-2pt}\item
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & #2 \\
+      \textit{\small#3} & \textit{\small #4} \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeSubSubheading}[2]{
+    \item
+    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+      \textit{\small#1} & \textit{\small #2} \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeProjectHeading}[2]{
+    \item
+    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+      \small#1 & #2 \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeSubItem}[1]{\resumeItem{#1}\vspace{-4pt}}
+
+\renewcommand\labelitemii{$\vcenter{\hbox{\tiny$\bullet$}}$}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.15in, label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+
+%-------------------------------------------
+%%%%%%  RESUME STARTS HERE  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{document}
+
+%----------HEADING----------
+\begin{center}
+    \textbf{\Huge \scshape Benjamin Nasse} \\ \vspace{1pt}
+    \small \href{mailto:benjaminnasse@icloud.com}{\underline{benjaminnasse@icloud.com}} $|$
+    \href{https://github.com/Bean0-0}{\underline{github.com/Bean0-0}} $|$
+    \href{https://linkedin.com/in/benjaminnasse}{\underline{linkedin.com/in/benjaminnasse}}
+\end{center}
+
+
+%-----------EDUCATION-----------
+\section{Education}
+  \resumeSubHeadingListStart
+    \resumeSubheading
+      {Texas A\&M University}{College Station, TX}
+      {Bachelor of Science in Engineering, Class of 2029}{Aug. 2025 -- May 2029}
+      \resumeItemListStart
+        \resumeItem{Aggies Create, Aggie Cyber, TAMUhack, Jujitsu Club}
+      \resumeItemListEnd
+    \resumeSubheading
+      {James E. Taylor High School}{Katy, TX}
+      {High School Diploma, Graduated with High Honors, wGPA 4.36}{Aug. 2021 -- May 2025}
+      \resumeItemListStart
+        \resumeItem{Computer Science Club (President), Rock Climbing Club (President), Robotics Club (Vice President), SkillsUSA Cybersecurity (3rd at Nationals), FBLA (National Finalist), National Honor Society}
+      \resumeItemListEnd
+  \resumeSubHeadingListEnd
+
+
+%-----------EXPERIENCE-----------
+\section{Experience}
+  \resumeSubHeadingListStart
+
+    \resumeSubheading
+      {Business Analyst Intern}{May 2026 -- Aug. 2026}
+      {Oil States International}{Houston, TX}
+      \resumeItemListStart
+        \resumeItem{Surfaced holes in data collection across aerospace operations by building standardized SQL Server semantic models and Power BI dashboards, exposing past-due work orders and inventory discrepancies}
+        \resumeItem{Sped up databook creation across two disconnected ERPs by bridging Glovia (SQL Server) and MasterControl (REST API) with a Python ETL pipeline, cutting 4-5 hours of manual work per databook section}
+        \resumeItem{Cut accounting process turnaround $\sim$10\% (one full business day) by developing a SharePoint Month End Status Tracking system with version control for financial submission packages}
+        \resumeItem{Expanded Commercial Contract Review automation to Houston pipeline repair product line by reverse-engineering an existing Copilot Studio solution}
+        \resumeItem{Drove company-wide AI adoption by founding internal AI community, drafting AI acceptable-use guidelines, and sharing custom GPTs for document review and API development}
+      \resumeItemListEnd
+
+    \resumeSubheading
+      {Head Lifeguard}{May 2022 -- Aug. 2024}
+      {GHPM -- Green Trails Estates Pool}{Katy, TX}
+      \resumeItemListStart
+        \resumeItem{Operated as head lifeguard for the Green Trails Estates pool, developing leadership, problem-solving, and conflict-resolution skills}
+        \resumeItem{Took part in daily business operations, coordinating staff and ensuring safety of patrons}
+      \resumeItemListEnd
+
+  \resumeSubHeadingListEnd
+
+
+%-----------PROJECTS-----------
+\section{Projects}
+    \resumeSubHeadingListStart
+      \resumeProjectHeading
+          {\textbf{TAMU Schedule Helper} $|$ \emph{JavaScript, Userscripts, Browser APIs}}{Aug. 2026 -- Present}
+          \resumeItemListStart
+            \resumeItem{Built browser extension that injects RateMyProfessors ratings and Anex grade distributions directly into the TAMU Aggie Schedule Builder}
+            \resumeItem{Streamlines course selection for Texas A\&M students by surfacing professor quality data inline}
+          \resumeItemListEnd
+      \resumeProjectHeading
+          {\textbf{pi-provider-kimi-code} $|$ \emph{TypeScript, API Integration}}{July 2025}
+          \resumeItemListStart
+            \resumeItem{Contributed to an open-source provider plugin integrating the Kimi Code (Moonshot) coding plan into the pi coding agent}
+          \resumeItemListEnd
+    \resumeSubHeadingListEnd
+
+
+%-----------AWARDS-----------
+\section{Awards}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     \textbf{Cybersecurity}{: 3rd Place, SkillsUSA National Competition, 2025} \quad
+     \textbf{Website Design}{: National Finalist, FBLA} \\
+     \textbf{Software Development}{: Top 5 of 200+ teams, HPE Competition} \quad
+     \textbf{Academics}{: Graduated with High Honors, National Honor Society}
+    }}
+ \end{itemize}
+
+
+%-----------TECHNICAL SKILLS-----------
+\section{Technical Skills}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     \textbf{Languages}{: Python, C, Java, JavaScript, TypeScript, HTML/CSS, SQL} \\
+     \textbf{Certifications}{: CompTIA Security+, AutoCAD Certified, Autodesk Inventor Certified, Harvard CS50 (C)} \\
+     \textbf{Developer Tools}{: Git, GitHub, VS Code, Docker, Linux, Powershell, Power BI, SharePoint, REST APIs, OpenAI API} \\
+      }}
+  \end{itemize}
+
+
+%-------------------------------------------
+\end{document}

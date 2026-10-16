@@ -1,0 +1,10 @@
+node_modules/
+.wrangler/
+.dev.vars*
+.env*
+.DS_Store
+test-results/
+playwright-report/
+*.log
+*.aux
+*.synctex.gz

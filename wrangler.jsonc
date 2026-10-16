@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "benjaminnasse-cv",
+  "account_id": "bf013a25c3181d2eacf9bd5c573707ab",
+  "compatibility_date": "2026-10-16",
+  "routes": [
+    { "pattern": "benjaminnasse.cv", "custom_domain": true }
+  ],
+  "assets": {
+    "directory": "./public",
+    "not_found_handling": "404-page"
+  },
+  "observability": {
+    "enabled": true,
+    "traces": { "enabled": true }
+  }
+}
