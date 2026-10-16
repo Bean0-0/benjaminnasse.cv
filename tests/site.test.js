@@ -18,7 +18,8 @@ test('internal navigation and local assets resolve', async () => {
 
 test('public directory contains only intended files', async () => {
   const files = (await readdir(new URL('public/', root))).sort();
-  assert.deepEqual(files, ['404.html', '_headers', 'favicon.svg', 'index.html', 'resume.pdf', 'robots.txt', 'sitemap.xml', 'styles.css'].sort());
+  assert.deepEqual(files, ['404.html', '_headers', 'favicon.svg', 'fonts', 'index.html', 'resume.pdf', 'robots.txt', 'sitemap.xml', 'styles.css'].sort());
+  assert.deepEqual((await readdir(new URL('public/fonts/', root))).sort(), ['OFL.txt', 'geist-latin.woff2']);
   assert.equal((await readFile(new URL('public/resume.pdf', root))).subarray(0, 5).toString(), '%PDF-');
 });
 

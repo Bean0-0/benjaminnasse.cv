@@ -1,6 +1,8 @@
 # Benjamin Nasse · Personal website
 
-Warm editorial portfolio at **https://benjaminnasse.cv**. Plain HTML and CSS, served by Cloudflare Workers Static Assets. No client-side JavaScript, external fonts, tracking, or production dependencies.
+Compact single-column portfolio at **https://benjaminnasse.cv**. Formatting follows [Nolan Yee's portfolio](https://www.nolanyee.cv/) without its terminal: centered 600px column, Geist typography, gray section labels, thin rules, and short entries. Original implementation with Benjamin's content. Plain HTML and CSS, served by Cloudflare Workers Static Assets. No client-side JavaScript, third-party requests, tracking, or production dependencies.
+
+Geist is self-hosted under the SIL Open Font License. Font and license live in `public/fonts/`; the matching source package is a development dependency.
 
 ## Local development
 
@@ -38,7 +40,7 @@ npm run test:e2e
 npm run deploy:check
 ```
 
-Browser tests cover 320/390/768/1440px layouts, navigation, WCAG AA automated checks, keyboard access, reduced motion, PDF delivery, security headers, and 404 routing. Automated checks do not replace human accessibility review. GitHub Actions runs these checks on pushes and pull requests.
+Browser tests cover 320/390/768/1440px layouts, compact centered formatting, project/contact links, absence of terminal controls, WCAG AA automated checks, keyboard access, reduced motion, PDF/font delivery, security headers, and 404 routing. Automated checks do not replace human accessibility review. GitHub Actions runs these checks on pushes and pull requests.
 
 ## Hosting
 
