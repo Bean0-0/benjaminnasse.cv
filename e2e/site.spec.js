@@ -46,7 +46,23 @@ for (const width of [320, 390, 768, 1440]) {
       await expect(page.locator('.document-name')).toHaveText(document.filename);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
       expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe('rgb(238, 238, 238)');
-      expect(await page.evaluate(() => document.fonts.check('14px Geist'))).toBe(true);
+      const fonts = await page.evaluate(() => ({
+        body: getComputedStyle(document.body).fontFamily,
+        sidebar: getComputedStyle(document.querySelector('.sidebar')).fontFamily,
+        heading: getComputedStyle(document.querySelector('h1')).fontFamily,
+        filename: getComputedStyle(document.querySelector('.document-name')).fontFamily,
+      }));
+      // Chromium on macOS serializes BlinkMacSystemFont as "system-ui".
+      expect(fonts.body).toMatch(/^ui-sans-serif, -apple-system, (?:BlinkMacSystemFont|"system-ui"), system-ui,/);
+      expect(fonts.sidebar).toBe(fonts.body);
+      expect(fonts.heading).toBe(fonts.body);
+      expect(fonts.filename).toBe(fonts.body);
+      expect(fonts.body).not.toContain('Geist');
+      if (document.key === 'note') {
+        for (const code of await page.locator('.prose code').all()) {
+          await expect(code).toHaveCSS('font-family', /^ui-monospace, SFMono-Regular,/);
+        }
+      }
       if (width <= 700) {
         await expect(page.locator('.mobile-explorer')).not.toHaveAttribute('open');
         expect(await page.locator('.sidebar').evaluate(el => el.getBoundingClientRect().height)).toBeLessThan(100);
@@ -115,14 +131,11 @@ test('keyboard skip link, disclosure controls, code focus, and reduced motion', 
   expect(await code.evaluate(el => getComputedStyle(el).outlineStyle)).toBe('solid');
 });
 
-test('PDF, local font, security headers, and missing pages', async ({ request }) => {
+test('PDF, security headers, and missing pages', async ({ request }) => {
   const pdf = await request.get('/resume.pdf');
   expect(pdf.status()).toBe(200);
   expect(pdf.headers()['content-type']).toContain('application/pdf');
   expect((await pdf.body()).subarray(0, 5).toString()).toBe('%PDF-');
-  const font = await request.get('/fonts/geist-latin.woff2');
-  expect(font.status()).toBe(200);
-  expect((await font.body()).subarray(0, 4).toString()).toBe('wOF2');
   const home = await request.get('/');
   expect(home.headers()['cache-control']).toContain('no-transform');
   expect(home.headers()['x-content-type-options']).toBe('nosniff');

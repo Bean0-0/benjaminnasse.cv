@@ -31,10 +31,9 @@ test('internal navigation and local assets resolve on all four pages', async () 
 
 test('public directory contains only intended files', async () => {
   const files = (await readdir(new URL('public/', root))).sort();
-  assert.deepEqual(files, ['404.html', '_headers', 'favicon.svg', 'fonts', 'index.html', 'projects', 'resume.pdf', 'robots.txt', 'sitemap.xml', 'styles.css', 'theme.js', 'writeups'].sort());
+  assert.deepEqual(files, ['404.html', '_headers', 'favicon.svg', 'index.html', 'projects', 'resume.pdf', 'robots.txt', 'sitemap.xml', 'styles.css', 'theme.js', 'writeups'].sort());
   assert.deepEqual(await readdir(new URL('public/writeups/', root)), ['building-useful-tools.html']);
   assert.deepEqual((await readdir(new URL('public/projects/', root))).sort(), ['kimi-code.html', 'tamu-schedule-helper.html']);
-  assert.deepEqual((await readdir(new URL('public/fonts/', root))).sort(), ['OFL.txt', 'geist-latin.woff2']);
   assert.equal((await readFile(new URL('public/resume.pdf', root))).subarray(0, 5).toString(), '%PDF-');
 });
 
@@ -94,12 +93,17 @@ test('project notes preserve real repository destinations and attribution', asyn
   assert.match(kimi, /Contributed to an open-source provider plugin/);
 });
 
-test('Paper palette and self-hosted font are preserved', async () => {
+test('Paper palette and Obsidian default font stacks are used', async () => {
   const css = await readFile(new URL('public/styles.css', root), 'utf8');
   for (const [name, color] of [['paper', '#eeeeee'], ['primary', '#444444'], ['sub', '#b2b2b2'], ['border', '#dddddd']]) {
     assert.ok(css.includes(`--${name}: ${color}`));
   }
-  assert.match(css, /src: url\('\/fonts\/geist-latin\.woff2'\)/);
+  assert.match(css, /--font-default: ui-sans-serif, -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", "Google Sans Flex", Roboto, "Inter Variable", "Inter", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;/);
+  assert.match(css, /--font-monospace: ui-monospace, SFMono-Regular, "Cascadia Mono", "Roboto Mono", "DejaVu Sans Mono", "Liberation Mono", Menlo, Monaco, "Consolas", "Source Code Pro", monospace;/);
+  assert.doesNotMatch(css, /Geist|@font-face/);
+  for (const file of [...pages, 'public/404.html']) {
+    assert.doesNotMatch(await readFile(new URL(file, root), 'utf8'), /as="font"|geist/i);
+  }
 });
 
 test('all pages initialize the optional theme before loading styles', async () => {

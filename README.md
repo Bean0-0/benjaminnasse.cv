@@ -2,7 +2,7 @@
 
 Source for [benjaminnasse.cv](https://benjaminnasse.cv), a personal website featuring projects, writeups, experience, and a downloadable résumé.
 
-Built with HTML and CSS and hosted on Cloudflare Workers Static Assets. The notebook interface uses a collapsible file explorer, a single reading pane, and a page outline. Light colors follow Monkeytype’s Paper theme; dark mode uses neutral charcoal tones. Fonts and scripts are self-hosted, with no analytics or runtime dependencies.
+Built with HTML and CSS and hosted on Cloudflare Workers Static Assets. The notebook interface uses a collapsible file explorer, a single reading pane, and a page outline. Light colors follow Monkeytype’s Paper theme; dark mode uses neutral charcoal tones. Typography uses Obsidian’s default system font stacks for the interface, reading, and code. Scripts are self-hosted, with no analytics, downloaded fonts, or runtime dependencies.
 
 ## Development
 
@@ -31,7 +31,6 @@ Wrangler serves extensionless HTML paths and applies the configured response hea
 | `public/styles.css` | Themes, typography, and responsive layout |
 | `public/theme.js` | System theme detection and saved appearance preference |
 | `public/resume.pdf` | Published résumé |
-| `public/fonts/` | Self-hosted Geist font and license |
 | `public/_headers` | Security and cache headers |
 | `content/writeups/` | Markdown source notes; not served |
 | `resume/resume.tex` | Public résumé source |
@@ -112,4 +111,4 @@ Hosting documentation: [Workers Static Assets](https://developers.cloudflare.com
 
 ## Licensing
 
-Geist is distributed under the SIL Open Font License, included in [`public/fonts/OFL.txt`](public/fonts/OFL.txt). Existing résumé attribution is preserved in its source.
+Existing résumé attribution and license comments are preserved in its source.
