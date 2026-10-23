@@ -1,37 +1,71 @@
-# Benjamin Nasse · Personal website
+# Benjamin Nasse
 
-Compact single-column portfolio at **https://benjaminnasse.cv**. Formatting follows [Nolan Yee's portfolio](https://www.nolanyee.cv/) without its terminal: centered 600px column, Geist typography, gray section labels, thin rules, and short entries. Original implementation with Benjamin's content. Plain HTML and CSS, served by Cloudflare Workers Static Assets. No client-side JavaScript, third-party requests, tracking, or production dependencies.
+Source for [benjaminnasse.cv](https://benjaminnasse.cv), a personal website featuring projects, writeups, experience, and a downloadable résumé.
 
-Geist is self-hosted under the SIL Open Font License. Font and license live in `public/fonts/`; the matching source package is a development dependency.
+Built with HTML and CSS and hosted on Cloudflare Workers Static Assets. The notebook interface uses a collapsible file explorer, a single reading pane, and a page outline. Light colors follow Monkeytype’s Paper theme; dark mode uses neutral charcoal tones. Fonts and scripts are self-hosted, with no analytics or runtime dependencies.
 
-## Local development
+## Development
 
-Node.js 22+ and npm:
+Requires Node.js 22+ and npm.
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Open http://127.0.0.1:8787.
+Open [http://127.0.0.1:8787](http://127.0.0.1:8787). To use another port:
 
-## Edit the site
+```sh
+npx wrangler dev --ip 127.0.0.1 --port 8791
+```
 
-- `public/index.html`: bio, projects, experience, contact, metadata.
-- `public/styles.css`: colors, typography, responsive layout.
-- `resume/resume.tex`: phone-free public résumé source.
-- `public/resume.pdf`: downloadable résumé served to visitors.
-- `wrangler.jsonc`: Cloudflare Worker and custom domain.
+Wrangler serves extensionless HTML paths and applies the configured response headers. A basic static server may require opening the `.html` paths directly.
 
-Edit public résumé separately from private originals. Do not copy a phone-bearing PDF into `public/`. With [Tectonic](https://tectonic-typesetting.github.io/) installed, rebuild the public copy:
+## Repository structure
+
+| Path | Purpose |
+| --- | --- |
+| `public/index.html` | Overview, projects, background, and metadata |
+| `public/projects/` | Project notes and repository links |
+| `public/writeups/` | Published HTML reading pages |
+| `public/styles.css` | Themes, typography, and responsive layout |
+| `public/theme.js` | System theme detection and saved appearance preference |
+| `public/resume.pdf` | Published résumé |
+| `public/fonts/` | Self-hosted Geist font and license |
+| `public/_headers` | Security and cache headers |
+| `content/writeups/` | Markdown source notes; not served |
+| `resume/resume.tex` | Public résumé source |
+| `tests/` | Content, asset, and configuration checks |
+| `e2e/` | Playwright browser and accessibility tests |
+| `wrangler.jsonc` | Cloudflare deployment configuration |
+
+Only `public/` is deployed.
+
+## Editing content
+
+Pages are maintained as static HTML. Add project notes to `public/projects/` and reading pages to `public/writeups/`, then update navigation in each page’s desktop and mobile explorers. Mark the active file with `aria-current="page"`. Add public, indexable pages to `public/sitemap.xml` and update tests when adding assets.
+
+Markdown files in `content/writeups/` can be edited in Obsidian, but Markdown-to-HTML publishing and vault synchronization are not implemented. Changes to Markdown do not rebuild the corresponding HTML. The `.md` filenames shown in the interface are presentation labels.
+
+“Notes on building useful tools” is explicitly labeled demonstration content, not a published article by Benjamin. Its HTML page is marked `noindex` and excluded from the sitemap.
+
+## Appearance
+
+The filename bar includes a **System / Light / Dark** selector. System follows the device preference, including live changes. Manual choices are saved in browser local storage and synchronized across pages and tabs; selecting System clears the override. If storage is unavailable, a manual choice applies only to the current page.
+
+The theme script runs before styles load to avoid flashing the wrong saved theme. Without JavaScript, CSS still follows the system preference and native folder navigation remains available. Folder expansion resets on navigation. Print styles use dark text on white in either theme.
+
+## Updating the résumé
+
+Edit `resume/resume.tex`, then rebuild with [Tectonic](https://tectonic-typesetting.github.io/):
 
 ```sh
 npm run resume:build
 ```
 
-Commit both source and rebuilt PDF. Cloudflare does not need a LaTeX installation because the public PDF is checked in.
+Commit both `resume/resume.tex` and `public/resume.pdf`. The PDF is checked in, so deployment does not require LaTeX. Keep private contact details out of both public files.
 
-## Validate
+## Testing
 
 ```sh
 npm run check
@@ -40,22 +74,27 @@ npm run test:e2e
 npm run deploy:check
 ```
 
-Browser tests cover 320/390/768/1440px layouts, compact centered formatting, project/contact links, absence of terminal controls, WCAG AA automated checks, keyboard access, reduced motion, PDF/font delivery, security headers, and 404 routing. Automated checks do not replace human accessibility review. GitHub Actions runs these checks on pushes and pull requests.
+Checks cover local links and anchors, assets, attribution, responsive layouts, keyboard navigation, folder controls, light/dark accessibility, theme persistence, blocked storage, JavaScript-disabled behavior, printing, security headers, and 404 responses. Browser tests save screenshots in `test-results/`. Automated accessibility checks supplement manual review.
 
-## Hosting
+To test an existing server:
 
-- Worker: `benjaminnasse-cv`
-- Custom domain: `benjaminnasse.cv`
-- Upload directory: `public/` only
-- Direct deployment: `npm run deploy` (requires Cloudflare authorization)
+```sh
+SITE_URL=http://127.0.0.1:8791 npm run test:e2e
+```
 
-`public/_headers` sends a strict Content Security Policy and `Cache-Control: no-transform` to prevent Cloudflare from injecting an analytics beacon. This preserves the no-script/no-tracking design; `no-transform` can also prevent edge compression and image transformations. See [Cloudflare's injection behavior](https://developers.cloudflare.com/web-analytics/get-started/).
+GitHub Actions runs checks on pushes to `main` and on pull requests. `npm run build` runs content, asset, and configuration checks; it does not compile or bundle the site.
 
-### GitHub automatic deployments — one-time connection
+## Deployment
 
-In Cloudflare, open **Workers & Pages → benjaminnasse-cv → Settings → Builds → Connect**. Authorize the Cloudflare GitHub app for **only** `Bean0-0/benjaminnasse.cv` where repository selection is offered.
+Worker: `benjaminnasse-cv`. Custom domain: `benjaminnasse.cv`.
 
-Set:
+With Cloudflare authorization:
+
+```sh
+npm run deploy
+```
+
+For automatic deployments, connect the repository through the Worker’s **Settings → Builds** in Cloudflare:
 
 | Setting | Value |
 | --- | --- |
@@ -65,14 +104,12 @@ Set:
 | Build command | `npm run build` |
 | Deploy command | `npx wrangler deploy` |
 
-Keep non-production branch deployments disabled unless wanted. No custom environment variables or secrets are needed by this static site. Cloudflare manages its build deployment authorization; do not commit tokens or paste them into chat.
+No application environment variables or secrets are required. Cloudflare manages authorization for connected builds. GitHub Actions and Cloudflare Builds are independent; use branch protection to require checks before merging to `main`.
 
-Once connected, each push to `main` builds and deploys. Verify the first build reaches **Success** and the domain shows the update. GitHub Actions checks and Cloudflare Builds are separate pipelines; use branch protection if checks must gate production merges.
+Security headers are defined in `public/_headers`. Content Security Policy allows only same-origin scripts, styles, fonts, and images, with no inline scripts or evaluation. The `no-transform` cache directive prevents edge content modifications, including analytics injection, and may also limit compression and image transformations.
 
-```sh
-git add public resume
-git commit -m "Update portfolio"
-git push
-```
+Hosting documentation: [Workers Static Assets](https://developers.cloudflare.com/workers/static-assets/) and [Workers Builds](https://developers.cloudflare.com/workers/ci-cd/builds/).
 
-Documentation: [Static Assets](https://developers.cloudflare.com/workers/static-assets/), [Workers Builds](https://developers.cloudflare.com/workers/ci-cd/builds/).
+## Licensing
+
+Geist is distributed under the SIL Open Font License, included in [`public/fonts/OFL.txt`](public/fonts/OFL.txt). Existing résumé attribution is preserved in its source.
