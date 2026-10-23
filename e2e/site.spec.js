@@ -8,7 +8,7 @@ const themeColors = { light: 'rgb(238, 238, 238)', dark: 'rgb(30, 30, 30)' };
 async function expectTheme(page, theme, preference) {
   await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
   await expect(page.locator('html')).toHaveAttribute('data-theme-preference', preference);
-  await expect(page.getByRole('combobox', { name: 'Theme', exact: true })).toHaveValue(preference);
+  await expect(page.getByRole('switch', { name: 'Dark mode', exact: true })).toHaveAttribute('aria-checked', String(theme === 'dark'));
   await expect(page.locator('body')).toHaveCSS('background-color', themeColors[theme]);
 }
 
@@ -213,29 +213,27 @@ for (const width of [320, 390, 768, 1440]) {
   });
 }
 
-test('system preference tracks live changes until a manual choice, then can be restored', async ({ page }) => {
+test('system preference tracks live changes until the binary switch is used', async ({ page }) => {
   await page.goto('/');
-  const select = page.getByRole('combobox', { name: 'Theme', exact: true });
+  const toggle = page.getByRole('switch', { name: 'Dark mode', exact: true });
   await expectTheme(page, 'light', 'system');
   expect(await page.evaluate(() => localStorage.getItem('theme'))).toBeNull();
   await page.emulateMedia({ colorScheme: 'dark' });
   await expectTheme(page, 'dark', 'system');
-  await select.selectOption('light');
+  await toggle.click();
   await expectTheme(page, 'light', 'light');
   expect(await page.evaluate(() => localStorage.getItem('theme'))).toBe('light');
   await page.emulateMedia({ colorScheme: 'light' });
   await page.emulateMedia({ colorScheme: 'dark' });
   await expectTheme(page, 'light', 'light');
-  await select.selectOption('system');
-  await expectTheme(page, 'dark', 'system');
-  expect(await page.evaluate(() => localStorage.getItem('theme'))).toBeNull();
-  await page.emulateMedia({ colorScheme: 'light' });
-  await expectTheme(page, 'light', 'system');
+  await toggle.click();
+  await expectTheme(page, 'dark', 'dark');
+  await expect(page.locator('select')).toHaveCount(0);
 });
 
 test('manual dark choice survives reload and navigation against a light system', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('combobox', { name: 'Theme', exact: true }).selectOption('dark');
+  await page.getByRole('switch', { name: 'Dark mode', exact: true }).click();
   await expectTheme(page, 'dark', 'dark');
   expect(await page.evaluate(() => localStorage.getItem('theme'))).toBe('dark');
   await page.reload();
@@ -247,15 +245,19 @@ test('manual dark choice survives reload and navigation against a light system',
   await expectTheme(page, 'dark', 'dark');
 });
 
-test('theme preference synchronizes between open pages, including restoring System', async ({ page, context }) => {
+test('theme preference synchronizes between open pages, including clearing the override', async ({ page, context }) => {
   await page.goto('/');
   const other = await context.newPage();
   await other.goto('/projects/kimi-code');
   await expectTheme(other, 'light', 'system');
-  await page.getByRole('combobox', { name: 'Theme', exact: true }).selectOption('dark');
+  await page.getByRole('switch', { name: 'Dark mode', exact: true }).click();
   await expectTheme(other, 'dark', 'dark');
-  await page.getByRole('combobox', { name: 'Theme', exact: true }).selectOption('system');
+  await other.getByRole('switch', { name: 'Dark mode', exact: true }).click();
+  await expectTheme(page, 'light', 'light');
+  await page.evaluate(() => localStorage.removeItem('theme'));
   await expectTheme(other, 'light', 'system');
+  await other.emulateMedia({ colorScheme: 'dark' });
+  await expectTheme(other, 'dark', 'system');
   await other.close();
 });
 
@@ -273,10 +275,10 @@ test('unavailable local storage does not break system or manual themes', async (
   await page.emulateMedia({ colorScheme: 'dark' });
   await page.goto('/');
   await expectTheme(page, 'dark', 'system');
-  await page.getByRole('combobox', { name: 'Theme', exact: true }).selectOption('light');
+  await page.getByRole('switch', { name: 'Dark mode', exact: true }).click();
   await expectTheme(page, 'light', 'light');
-  await page.getByRole('combobox', { name: 'Theme', exact: true }).selectOption('system');
-  await expectTheme(page, 'dark', 'system');
+  await page.getByRole('switch', { name: 'Dark mode', exact: true }).click();
+  await expectTheme(page, 'dark', 'dark');
   await page.reload();
   await expectTheme(page, 'dark', 'system');
   expect(errors).toEqual([]);
@@ -298,9 +300,14 @@ test('without JavaScript, system dark colors and native navigation still work', 
     for (const path of ['/', '/writeups/building-useful-tools', '/not-a-real-page']) {
       await page.goto(path);
       await expect(page.locator('body')).toHaveCSS('background-color', themeColors.dark);
-      await expect(page.locator('#theme-select')).toBeHidden();
+      await expect(page.locator('#theme-toggle')).toBeHidden();
     }
     await page.goto('/');
+    const folder = page.locator('.desktop-explorer .folder').last();
+    await folder.locator(':scope > summary').press('Enter');
+    await expect(folder).not.toHaveAttribute('open');
+    await folder.locator(':scope > summary').press('Space');
+    await expect(folder).toHaveAttribute('open');
     await page.locator('.desktop-explorer').getByRole('link', { name: 'TAMU Schedule Helper' }).click();
     await expect(page).toHaveURL(/\/projects\/tamu-schedule-helper$/);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('TAMU Schedule Helper');
@@ -309,17 +316,140 @@ test('without JavaScript, system dark colors and native navigation still work', 
   }
 });
 
-test('theme selector is keyboard operable and works on the 404 page', async ({ page }) => {
+test('theme switch supports Space and Enter on the 404 page', async ({ page }) => {
   await page.goto('/not-a-real-page');
-  const select = page.getByRole('combobox', { name: 'Theme', exact: true });
-  await select.focus();
-  await expect(select).toBeFocused();
-  // Native popup arrow handling varies by OS; typeahead uses the select's keyboard API.
-  await page.keyboard.press('d');
-  await page.keyboard.press('Tab');
+  const toggle = page.getByRole('switch', { name: 'Dark mode', exact: true });
+  await toggle.focus();
+  await expect(toggle).toBeFocused();
+  await page.keyboard.press('Space');
+  await expectTheme(page, 'dark', 'dark');
+  await page.keyboard.press('Enter');
+  await expectTheme(page, 'light', 'light');
+  await page.keyboard.press('Enter');
   await expectTheme(page, 'dark', 'dark');
   await page.getByRole('link', { name: 'Back to Benjamin Nasse' }).click();
   await expectTheme(page, 'dark', 'dark');
+});
+
+test('theme colors interpolate in both directions instead of snapping', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/');
+  for (const theme of ['dark', 'light']) {
+    const frames = await page.evaluate(async () => {
+      const colors = () => [
+        getComputedStyle(document.body).backgroundColor,
+        getComputedStyle(document.body).color,
+        getComputedStyle(document.querySelector('.sidebar')).borderRightColor,
+      ];
+      const samples = [colors()];
+      document.getElementById('theme-toggle').click();
+      const start = performance.now();
+      while (performance.now() - start < 550) {
+        await new Promise(requestAnimationFrame);
+        samples.push(colors());
+      }
+      return samples;
+    });
+    for (let color = 0; color < 3; color++) {
+      const first = frames[0][color];
+      const last = frames.at(-1)[color];
+      expect(first).not.toBe(last);
+      expect(frames.some(frame => frame[color] !== first && frame[color] !== last), `Color ${color} should interpolate`).toBe(true);
+    }
+    await expectTheme(page, theme, theme);
+  }
+});
+
+for (const width of [390, 1440]) {
+  test(`folder motion interpolates height in both directions at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 1000 });
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.goto('/');
+    const tree = await explorer(page, width);
+    const folder = tree.locator('.folder').last();
+    for (const opening of [false, true]) {
+      const frames = await folder.evaluate(async element => {
+        const heights = [element.getBoundingClientRect().height];
+        element.querySelector('summary').click();
+        const start = performance.now();
+        while (performance.now() - start < 300) {
+          await new Promise(requestAnimationFrame);
+          heights.push(element.getBoundingClientRect().height);
+        }
+        return heights;
+      });
+      const first = frames[0];
+      const last = frames.at(-1);
+      expect(opening ? last > first : last < first).toBe(true);
+      expect(frames.some(height => height > Math.min(first, last) + 1 && height < Math.max(first, last) - 1), `Expected intermediate folder heights, got ${frames}`).toBe(true);
+      await expect(folder).toHaveAttribute('data-expanded', String(opening));
+      await expect(folder.locator(':scope > summary')).toHaveAttribute('aria-expanded', String(opening));
+      if (opening) await expect(folder).toHaveAttribute('open');
+      else await expect(folder).not.toHaveAttribute('open');
+    }
+  });
+}
+
+test('folder motion reverses without jumps and latest click wins', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  for (const clicks of [2, 3, 6]) {
+    await page.goto('/');
+    const folder = page.locator('.desktop-explorer .folder').last();
+    const result = await folder.evaluate(async (element, count) => {
+      const jumps = [];
+      for (let index = 0; index < count; index++) {
+        const before = element.getBoundingClientRect().height;
+        element.querySelector('summary').click();
+        jumps.push(Math.abs(element.getBoundingClientRect().height - before));
+        await new Promise(requestAnimationFrame);
+        await new Promise(requestAnimationFrame);
+      }
+      await new Promise(resolve => setTimeout(resolve, 260));
+      return { jumps, open: element.open, expanded: element.dataset.expanded, animating: element.hasAttribute('data-animating'), animations: element.getAnimations().length };
+    }, clicks);
+    expect(result.jumps.every(jump => jump < 1)).toBe(true);
+    expect(result.open).toBe(clicks % 2 === 0);
+    expect(result.expanded).toBe(String(result.open));
+    expect(result.animating).toBe(false);
+    expect(result.animations).toBe(0);
+  }
+});
+
+test('closing folders immediately removes descendants from keyboard navigation', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/');
+  const folder = page.locator('.desktop-explorer .folder').last();
+  const summary = folder.locator(':scope > summary');
+  await folder.getByRole('link').first().focus();
+  await summary.evaluate(element => element.click());
+  await expect(summary).toBeFocused();
+  await expect(folder.locator('.folder-files')).toHaveJSProperty('inert', true);
+  await folder.locator('.file-link').first().evaluate(element => element.focus());
+  await expect(summary).toBeFocused();
+  await expect(folder).not.toHaveAttribute('open');
+  await summary.press('Space');
+  await expect(folder.locator('.folder-files')).toHaveJSProperty('inert', false);
+  await expect(folder).toHaveAttribute('open');
+});
+
+test('reduced motion disables folder, chevron, and switch animations', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  const folder = page.locator('.desktop-explorer .folder').last();
+  const closed = await folder.evaluate(element => {
+    element.querySelector('summary').click();
+    return { open: element.open, animations: element.getAnimations({ subtree: true }).length, chevron: getComputedStyle(element.querySelector('.icon-chevron')).transitionDuration };
+  });
+  expect(closed).toEqual({ open: false, animations: 0, chevron: '0s' });
+  await folder.locator(':scope > summary').press('Enter');
+  await expect(folder).toHaveAttribute('open');
+  const switched = await page.locator('#theme-toggle').evaluate(button => {
+    button.click();
+    return { background: getComputedStyle(document.body).backgroundColor, animations: document.documentElement.getAnimations().length };
+  });
+  expect(switched).toEqual({ background: themeColors.dark, animations: 0 });
+  await expect(page.locator('.theme-thumb')).toHaveCSS('transition-duration', '0s');
 });
 
 test('printing dark pages stays readable with and without JavaScript', async ({ browser }, testInfo) => {
@@ -332,7 +462,7 @@ test('printing dark pages stays readable with and without JavaScript', async ({ 
       await page.emulateMedia({ media: 'print' });
       await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(255, 255, 255)');
       await expect(page.getByRole('heading', { level: 1 })).toHaveCSS('color', 'rgb(0, 0, 0)');
-      await expect(page.getByRole('combobox', { name: 'Theme', exact: true })).not.toBeVisible();
+      await expect(page.getByRole('switch', { name: 'Dark mode', exact: true })).not.toBeVisible();
     } finally {
       await context.close();
     }

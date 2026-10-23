@@ -16,8 +16,11 @@
     root.dataset.themePreference = preference;
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.content = theme === 'dark' ? '#1e1e1e' : '#eeeeee';
-    const select = document.getElementById('theme-select');
-    if (select) select.value = preference;
+    const toggle = document.getElementById('theme-toggle');
+    if (toggle) {
+      toggle.setAttribute('aria-checked', String(theme === 'dark'));
+      toggle.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+    }
   }
 
   // Run before styles load to avoid flashing the wrong saved theme.
@@ -31,19 +34,20 @@
   });
 
   document.addEventListener('DOMContentLoaded', () => {
-    const select = document.getElementById('theme-select');
-    if (!select) return;
-    select.closest('.theme-control').hidden = false;
-    select.addEventListener('change', () => {
-      preference = normalize(select.value);
+    const toggle = document.getElementById('theme-toggle');
+    if (!toggle) return;
+    toggle.hidden = false;
+    toggle.addEventListener('click', () => {
+      preference = root.dataset.theme === 'dark' ? 'light' : 'dark';
       try {
-        if (preference === 'system') localStorage.removeItem('theme');
-        else localStorage.setItem('theme', preference);
+        localStorage.setItem('theme', preference);
       } catch {
         // Keep the in-memory choice when persistence is unavailable.
       }
       apply();
     });
     apply();
+    // Enable color transitions only after the saved initial theme is applied.
+    root.classList.add('theme-ready');
   });
 })();

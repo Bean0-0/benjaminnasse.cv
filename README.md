@@ -30,6 +30,7 @@ Wrangler serves extensionless HTML paths and applies the configured response hea
 | `public/writeups/` | Published HTML reading pages |
 | `public/styles.css` | Themes, typography, and responsive layout |
 | `public/theme.js` | System theme detection and saved appearance preference |
+| `public/navigation.js` | Reversible folder height animation and keyboard-safe disclosure |
 | `public/resume.pdf` | Published résumé |
 | `public/_headers` | Security and cache headers |
 | `content/writeups/` | Markdown source notes; not served |
@@ -50,9 +51,9 @@ Markdown files in `content/writeups/` can be edited in Obsidian, but Markdown-to
 
 ## Appearance
 
-The filename bar includes a **System / Light / Dark** selector. System follows the device preference, including live changes. Manual choices are saved in browser local storage and synchronized across pages and tabs; selecting System clears the override. If storage is unavailable, a manual choice applies only to the current page.
+The filename bar includes a **Dark mode** switch. On first visit, appearance follows the device preference, including live changes. Clicking the switch toggles between light and dark; that choice is saved in browser local storage and synchronized across pages and tabs. Clearing the saved site preference restores system-following behavior. If storage is unavailable, a manual choice applies only to the current page.
 
-The theme script runs before styles load to avoid flashing the wrong saved theme. Without JavaScript, CSS still follows the system preference and native folder navigation remains available. Folder expansion resets on navigation. Print styles use dark text on white in either theme.
+The theme script runs before styles load to avoid flashing the wrong saved theme. Subsequent theme changes fade shared background, text, and border colors together over 240 ms. Folder contents slide open and closed over 180 ms; repeated clicks reverse from the current height. Closing folders remove their contents from keyboard navigation immediately. Reduced-motion preferences disable animations. Without JavaScript, CSS still follows the system preference and native folder navigation remains available. Folder expansion resets on navigation. Print styles use dark text on white in either theme.
 
 ## Updating the résumé
 

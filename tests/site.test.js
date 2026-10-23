@@ -31,7 +31,7 @@ test('internal navigation and local assets resolve on all four pages', async () 
 
 test('public directory contains only intended files', async () => {
   const files = (await readdir(new URL('public/', root))).sort();
-  assert.deepEqual(files, ['404.html', '_headers', 'favicon.svg', 'index.html', 'projects', 'resume.pdf', 'robots.txt', 'sitemap.xml', 'styles.css', 'theme.js', 'writeups'].sort());
+  assert.deepEqual(files, ['404.html', '_headers', 'favicon.svg', 'index.html', 'navigation.js', 'projects', 'resume.pdf', 'robots.txt', 'sitemap.xml', 'styles.css', 'theme.js', 'writeups'].sort());
   assert.deepEqual(await readdir(new URL('public/writeups/', root)), ['building-useful-tools.html']);
   assert.deepEqual((await readdir(new URL('public/projects/', root))).sort(), ['kimi-code.html', 'tamu-schedule-helper.html']);
   assert.equal((await readFile(new URL('public/resume.pdf', root))).subarray(0, 5).toString(), '%PDF-');
@@ -53,7 +53,7 @@ test('metadata, accessibility hooks, and honest project attribution exist', asyn
     assert.match(text, /name="viewport"/);
     assert.match(text, /class="skip-link"/);
     assert.equal([...text.matchAll(/<h1\b/g)].length, 1);
-    assert.deepEqual([...text.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)].map(match => [match[1].trim(), match[2].trim()]), [['src="/theme.js"', '']], 'Only the local theme enhancement should run');
+    assert.deepEqual([...text.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)].map(match => [match[1].trim(), match[2].trim()]), [['src="/theme.js"', ''], ['src="/navigation.js" defer', '']], 'Only local theme and navigation enhancements should run');
   }
 });
 
@@ -112,10 +112,8 @@ test('all pages initialize the optional theme before loading styles', async () =
     const script = text.indexOf('<script src="/theme.js"></script>');
     const stylesheet = text.indexOf('href="/styles.css"');
     assert.ok(script >= 0 && script < stylesheet, `Theme must initialize before styles in ${file}`);
-    assert.match(text, /id="theme-select"/);
-    for (const preference of ['system', 'light', 'dark']) {
-      assert.match(text, new RegExp(`<option\\b[^>]*value="${preference}"`));
-    }
+    assert.match(text, /<button\b[^>]*id="theme-toggle"[^>]*type="button"[^>]*role="switch"[^>]*aria-label="Dark mode"[^>]*aria-checked="false"[^>]*hidden/);
+    assert.doesNotMatch(text, /<select\b|theme-select/);
   }
   const css = await readFile(new URL('public/styles.css', root), 'utf8');
   assert.match(css, /prefers-color-scheme:\s*dark/);

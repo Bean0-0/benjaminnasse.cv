@@ -13,6 +13,7 @@
   <meta property="og:url" content="https://benjaminnasse.cv/">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <script src="/theme.js"></script>
+  <script src="/navigation.js" defer></script>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
@@ -25,7 +26,7 @@
       <nav class="sidebar-links" aria-label="Profile links"><a href="/resume.pdf">Résumé</a><a href="mailto:benjaminnasse@icloud.com">Contact</a><a href="https://github.com/Bean0-0">GitHub</a><a href="https://linkedin.com/in/benjaminnasse">LinkedIn</a></nav>
     </aside>
     <div class="workspace-main">
-      <header class="document-bar" aria-label="Current file"><svg class="icon icon-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><span class="document-name">Overview.md</span><label class="theme-control" for="theme-select" hidden><span>Theme</span><select id="theme-select"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label></header>
+      <header class="document-bar" aria-label="Current file"><svg class="icon icon-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><span class="document-name">Overview.md</span><button class="theme-control" id="theme-toggle" type="button" role="switch" aria-label="Dark mode" aria-checked="false" hidden><span>Dark</span><span class="theme-track" aria-hidden="true"><span class="theme-thumb"></span></span></button></header>
       <div class="reading-layout">
         <main id="main" class="page" tabindex="-1">
           <header class="profile-header" id="overview">
