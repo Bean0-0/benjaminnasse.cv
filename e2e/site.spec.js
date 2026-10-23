@@ -28,6 +28,22 @@ async function explorer(page, width) {
   return page.locator('.desktop-explorer').getByRole('navigation', { name: 'Notebook files' });
 }
 
+async function expectNavigatorStyle(tree) {
+  await expect(tree).toHaveCSS('font-size', '13px');
+  await expect(tree).toHaveCSS('font-weight', '400');
+  await expect(tree.locator('[aria-current="page"]')).toHaveCSS('font-weight', '400');
+  for (const icon of await tree.locator('.icon-file, .icon-folder').all()) {
+    await expect(icon).toHaveCSS('display', 'none');
+  }
+  for (const label of await tree.locator('.file-link > span, .folder > summary > span').all()) {
+    await expect(label).toHaveCSS('white-space', 'nowrap');
+    await expect(label).toHaveCSS('text-overflow', 'ellipsis');
+  }
+  for (const chevron of await tree.locator('.folder > summary .icon-chevron').all()) {
+    await expect(chevron).toBeVisible();
+  }
+}
+
 for (const width of [320, 390, 768, 1440]) {
   test(`single-pane notebook, folders, and accessibility at ${width}px`, async ({ page }, testInfo) => {
     await page.setViewportSize({ width, height: 1000 });
@@ -73,6 +89,7 @@ for (const width of [320, 390, 768, 1440]) {
       expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()).violations).toEqual([]);
       await page.screenshot({ path: `test-results/obsidian-paper-${document.key}-${width}.png`, fullPage: true });
       const tree = await explorer(page, width);
+      await expectNavigatorStyle(tree);
       await expect(tree.locator('[aria-current="page"]')).toHaveCount(1);
       await expect(tree.locator('[aria-current="page"]')).toHaveAttribute('href', document.path);
       if (document.path !== '/') {
@@ -178,10 +195,16 @@ for (const width of [320, 390, 768, 1440]) {
       if (['overview', 'note'].includes(document.key)) {
         await page.screenshot({ path: `test-results/obsidian-paper-dark-${document.key}-${width}.png`, fullPage: true });
       }
-      if (width <= 700 && document.key !== '404') {
+      if (document.key !== '404') {
         const tree = await explorer(page, width);
+        await expectNavigatorStyle(tree);
         await expect(tree.locator('[aria-current="page"]')).toHaveCount(1);
-        expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()).violations).toEqual([]);
+        if (width <= 700) {
+          expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()).violations).toEqual([]);
+          if (document.key === 'overview') {
+            await page.screenshot({ path: `test-results/obsidian-sidebar-dark-files-${width}.png`, fullPage: true });
+          }
+        }
       }
     }
     expect(errors).toEqual([]);
