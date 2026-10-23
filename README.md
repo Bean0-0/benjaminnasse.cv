@@ -1,10 +1,8 @@
 # Benjamin Nasse
 
-[benjaminnasse.cv](https://benjaminnasse.cv) — my personal website for projects, writeups, and résumé.
+Source for [benjaminnasse.cv](https://benjaminnasse.cv). Design inspired by [Obsidian](https://obsidian.md).
 
-Inspired by [Obsidian](https://obsidian.md): a simple file explorer, reading pane, and light/dark themes.
-
-Built with HTML, CSS, and JavaScript. Hosted on [Cloudflare Workers Static Assets](https://developers.cloudflare.com/workers/static-assets/), which serves the `public/` directory directly. Deployment is configured in `wrangler.jsonc` and managed with Wrangler.
+The site is plain HTML, CSS and JavaScript. [Cloudflare Workers](https://developers.cloudflare.com/workers/static-assets/) serves the files in `public/`.
 
 ## Development
 
@@ -16,8 +14,6 @@ npm run dev
 ```
 
 ## Deployment
-
-With Cloudflare authorization:
 
 ```sh
 npm run deploy
