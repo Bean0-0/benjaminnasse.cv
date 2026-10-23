@@ -112,7 +112,10 @@ test('all pages initialize the optional theme before loading styles', async () =
     const script = text.indexOf('<script src="/theme.js"></script>');
     const stylesheet = text.indexOf('href="/styles.css"');
     assert.ok(script >= 0 && script < stylesheet, `Theme must initialize before styles in ${file}`);
-    assert.match(text, /<button\b[^>]*id="theme-toggle"[^>]*type="button"[^>]*role="switch"[^>]*aria-label="Dark mode"[^>]*aria-checked="false"[^>]*hidden/);
+    assert.match(text, /<label class="switch theme-control" hidden><input class="switch__input" id="theme-toggle" type="checkbox" role="switch">/);
+    assert.match(text, /<span class="switch__sr">Dark mode<\/span>/);
+    assert.equal([...text.matchAll(/class="switch__icon-part switch__icon-part--\d+"/g)].length, 11);
+    assert.doesNotMatch(text, /<span>Dark<\/span>|theme-track|theme-thumb/);
     assert.doesNotMatch(text, /<select\b|theme-select/);
   }
   const css = await readFile(new URL('public/styles.css', root), 'utf8');

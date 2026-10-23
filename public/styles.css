@@ -62,7 +62,7 @@ html { scroll-behavior: smooth; scroll-padding-top: 64px; }
 body { margin: 0; background: var(--paper); color: var(--primary); font: 14px/1.7 var(--font-default); -webkit-font-smoothing: antialiased; }
 p, h1, h2, h3 { margin: 0; }
 a { color: inherit; text-underline-offset: 3px; }
-a:focus-visible, summary:focus-visible, pre:focus-visible, button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 3px; }
+a:focus-visible, summary:focus-visible, pre:focus-visible, input:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 3px; }
 ::selection { background: var(--selection); }
 .skip-link { position: fixed; top: -100px; left: 16px; padding: 7px 12px; background: var(--primary); color: var(--paper); z-index: 10; }
 .skip-link:focus { top: 8px; }
@@ -97,12 +97,82 @@ a:focus-visible, summary:focus-visible, pre:focus-visible, button:focus-visible 
 .document-bar .icon { color: var(--secondary); width: 14px; height: 14px; flex-basis: 14px; }
 .document-folder { color: var(--secondary); flex-shrink: 0; }
 .document-name { min-width: 0; overflow-wrap: anywhere; }
-.theme-control { margin-left: auto; flex-shrink: 0; display: inline-flex; align-items: center; gap: 7px; min-height: 28px; padding: 2px 0 2px 4px; border: 0; background: transparent; color: var(--secondary); font: inherit; font-size: 11px; cursor: pointer; }
+.theme-control { margin-left: auto; flex-shrink: 0; }
 .theme-control[hidden] { display: none; }
-.theme-track { display: block; width: 30px; height: 18px; padding: 2px; border: 1px solid var(--secondary); border-radius: 999px; background: var(--selection); transition: background-color 180ms ease; }
-.theme-thumb { display: block; width: 12px; height: 12px; border-radius: 50%; background: var(--secondary); transition: transform 180ms ease, background-color 180ms ease; }
-.theme-control[aria-checked="true"] .theme-track { background: var(--primary); }
-.theme-control[aria-checked="true"] .theme-thumb { background: var(--paper); transform: translateX(12px); }
+/* Sun/moon morph, scoped and sized for the filename bar. */
+.switch {
+  --switch-ink: #1e1e1e;
+  --switch-paper: #eeeeee;
+  --switch-duration: 0.4s;
+  --switch-timing: cubic-bezier(0.65, 0, 0.35, 1);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  font-size: 14px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.switch__input, .switch__input::before { background: var(--switch-ink); }
+.switch__input {
+  position: relative;
+  display: block;
+  width: 3em;
+  height: 1.5em;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0.75em;
+  font: inherit;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: background-color var(--switch-duration) var(--switch-timing);
+}
+.switch__input:focus-visible { border-radius: 0.75em; }
+.switch__input::before {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0.125em;
+  left: 0.125em;
+  width: 1.25em;
+  height: 1.25em;
+  border-radius: 50%;
+  transition: background-color var(--switch-duration) var(--switch-timing), transform var(--switch-duration) var(--switch-timing);
+}
+.switch__icon, .switch__icon-part { display: block; position: absolute; top: 0; left: 0; }
+.switch__icon {
+  top: calc(50% - 0.625em);
+  left: 0.125em;
+  width: 1.25em;
+  height: 1.25em;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--switch-paper);
+  pointer-events: none;
+  transition: transform var(--switch-duration) var(--switch-timing);
+}
+.switch__icon-part { transition: box-shadow var(--switch-duration) var(--switch-timing), transform var(--switch-duration) var(--switch-timing); }
+.switch__icon-part--1, .switch__icon-part--2, .switch__icon-part--3 { border-radius: 50%; }
+.switch__icon-part--1 { top: calc(50% - 0.375em); left: calc(50% - 0.375em); width: 0.75em; height: 0.75em; background: var(--switch-paper); }
+.switch__icon-part--2 { top: calc(50% - 0.4375em); left: calc(50% - 0.0625em); width: 0.5em; height: 0.5em; background: var(--switch-ink); transform: translate(-0.1875em, 0.1875em) scale(0.2); }
+.switch__icon-part--3 { width: 1.25em; height: 1.25em; box-shadow: 0 0 0 0.625em var(--switch-ink) inset; transform: scale(0.25); }
+.switch__icon-part--3 ~ .switch__icon-part { top: 50%; left: 50%; width: 0.125em; height: 0.1875em; border-radius: 0.0625em; background: var(--switch-ink); transform-origin: 50% 0; transform: translateX(-50%) rotate(var(--ray-angle)) translateY(0.25em); }
+.switch__icon-part--4 { --ray-angle: 0deg; }
+.switch__icon-part--5 { --ray-angle: 45deg; }
+.switch__icon-part--6 { --ray-angle: 90deg; }
+.switch__icon-part--7 { --ray-angle: 135deg; }
+.switch__icon-part--8 { --ray-angle: 180deg; }
+.switch__icon-part--9 { --ray-angle: 225deg; }
+.switch__icon-part--10 { --ray-angle: 270deg; }
+.switch__icon-part--11 { --ray-angle: 315deg; }
+.switch__input:checked { background: var(--switch-paper); }
+.switch__input:checked::before, .switch__input:checked ~ .switch__icon { transform: translateX(1.5em); }
+.switch__input:checked ~ .switch__icon .switch__icon-part--2 { transform: translate(0, 0) scale(1); }
+.switch__input:checked ~ .switch__icon .switch__icon-part--3 { box-shadow: 0 0 0 0.25em var(--switch-ink) inset; transform: scale(1); }
+.switch__input:checked ~ .switch__icon .switch__icon-part--3 ~ .switch__icon-part { transform: translateX(-50%) rotate(var(--ray-angle)) translateY(0.625em) scale(0); }
+.switch__sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .error-toolbar { display: flex; padding: 12px 20px; }
 .reading-layout { display: grid; grid-template-columns: minmax(0, 680px) 176px; gap: 56px; max-width: 1016px; margin: 0 auto; padding: 58px 42px 60px; }
 .page { min-width: 0; outline: none; }
@@ -187,7 +257,8 @@ h3 { font-size: 14px; font-weight: 550; line-height: 1.6; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   :root.theme-ready { transition: none; }
-  .folder > summary .icon-chevron, .mobile-explorer > summary .icon-chevron, .theme-track, .theme-thumb { transition: none; }
+  .folder > summary .icon-chevron, .mobile-explorer > summary .icon-chevron,
+  .switch__input, .switch__input::before, .switch__icon, .switch__icon-part { transition: none; }
 }
 @media print {
   :root.theme-ready { transition: none; }

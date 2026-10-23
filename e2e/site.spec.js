@@ -8,7 +8,7 @@ const themeColors = { light: 'rgb(238, 238, 238)', dark: 'rgb(30, 30, 30)' };
 async function expectTheme(page, theme, preference) {
   await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
   await expect(page.locator('html')).toHaveAttribute('data-theme-preference', preference);
-  await expect(page.getByRole('switch', { name: 'Dark mode', exact: true })).toHaveAttribute('aria-checked', String(theme === 'dark'));
+  await expect(page.getByRole('switch', { name: 'Dark mode', exact: true })).toBeChecked({ checked: theme === 'dark' });
   await expect(page.locator('body')).toHaveCSS('background-color', themeColors[theme]);
 }
 
@@ -331,6 +331,31 @@ test('theme switch supports Space and Enter on the 404 page', async ({ page }) =
   await expectTheme(page, 'dark', 'dark');
 });
 
+test('sun and moon switch morphs, has no fixed visible label, and label clicks work', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/');
+  const toggle = page.getByRole('switch', { name: 'Dark mode' });
+  const label = page.locator('.switch');
+  const icon = label.locator('.switch__icon');
+  await expect(toggle).toHaveAttribute('type', 'checkbox');
+  await expect(toggle).not.toBeChecked();
+  await expect(toggle).toHaveAttribute('title', 'Switch to dark mode');
+  await expect(label.locator('.switch__icon-part')).toHaveCount(11);
+  await expect(label.locator('.switch__sr')).toHaveCSS('clip-path', 'inset(50%)');
+  await expect(label.locator(':scope > span:not(.switch__icon):not(.switch__sr)')).toHaveCount(0);
+  await label.screenshot({ path: 'test-results/theme-switch-sun.png' });
+  // Click the label padding, not the checkbox, to exercise native label activation.
+  await label.click({ position: { x: 3, y: 1 } });
+  await expectTheme(page, 'dark', 'dark');
+  await expect(toggle).toHaveAttribute('title', 'Switch to light mode');
+  await expect(icon).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 21, 0)');
+  await expect(label.locator('.switch__icon-part--2')).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)');
+  await label.screenshot({ path: 'test-results/theme-switch-moon.png' });
+  await toggle.click();
+  await expectTheme(page, 'light', 'light');
+  await expect(icon).toHaveCSS('transform', 'none');
+});
+
 test('theme colors interpolate in both directions instead of snapping', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.goto('/');
@@ -449,7 +474,9 @@ test('reduced motion disables folder, chevron, and switch animations', async ({ 
     return { background: getComputedStyle(document.body).backgroundColor, animations: document.documentElement.getAnimations().length };
   });
   expect(switched).toEqual({ background: themeColors.dark, animations: 0 });
-  await expect(page.locator('.theme-thumb')).toHaveCSS('transition-duration', '0s');
+  await expect(page.locator('.switch__input')).toHaveCSS('transition-duration', '0s');
+  await expect(page.locator('.switch__icon')).toHaveCSS('transition-duration', '0s');
+  await expect(page.locator('.switch__icon-part--3')).toHaveCSS('transition-duration', '0s');
 });
 
 test('printing dark pages stays readable with and without JavaScript', async ({ browser }, testInfo) => {

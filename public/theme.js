@@ -18,7 +18,7 @@
     if (meta) meta.content = theme === 'dark' ? '#1e1e1e' : '#eeeeee';
     const toggle = document.getElementById('theme-toggle');
     if (toggle) {
-      toggle.setAttribute('aria-checked', String(theme === 'dark'));
+      toggle.checked = theme === 'dark';
       toggle.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
     }
   }
@@ -36,9 +36,15 @@
   document.addEventListener('DOMContentLoaded', () => {
     const toggle = document.getElementById('theme-toggle');
     if (!toggle) return;
-    toggle.hidden = false;
-    toggle.addEventListener('click', () => {
-      preference = root.dataset.theme === 'dark' ? 'light' : 'dark';
+    toggle.closest('.theme-control').hidden = false;
+    toggle.addEventListener('keydown', event => {
+      if (event.key === 'Enter' && !event.repeat) {
+        event.preventDefault();
+        toggle.click();
+      }
+    });
+    toggle.addEventListener('change', () => {
+      preference = toggle.checked ? 'dark' : 'light';
       try {
         localStorage.setItem('theme', preference);
       } catch {
